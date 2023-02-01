@@ -1,14 +1,27 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
   mode: "production",
   watch: false,
   entry: path.join(__dirname, "src", "index"),
   output: {
-    filename: "main.js",
+    filename: "main.[chunkhash].js",
     clean: true,
+  },
+
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          output: {
+            comments: false,
+          },
+        },
+      }),
+    ],
   },
 
   module: {

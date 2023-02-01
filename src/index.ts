@@ -1,13 +1,7 @@
 import Phaser from "phaser";
 // import First from "./Scene/01";
 // import Second from "./Scene/02";
-declare global {
-  //设置全局属性
-  interface Window {
-    //window对象属性
-    abc: any; //加入对象
-  }
-}
+
 var config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: 800,
@@ -16,7 +10,7 @@ var config: Phaser.Types.Core.GameConfig = {
     default: "arcade",
     arcade: {
       gravity: { y: 300 },
-      debug: false,
+      debug: process.env.NODE_ENV === "development",
     },
   },
   parent: "phaserGame",
@@ -42,6 +36,8 @@ let score = 0;
 let scoreText: Phaser.GameObjects.Text;
 let roundText: Phaser.GameObjects.Text;
 let isGameOver = false;
+let startsNum = 12;
+let enterKey: Phaser.Input.Keyboard.Key;
 
 function preload(this: Phaser.Scene) {
   this.load.image("sky", "assets/sky.png");
@@ -74,16 +70,41 @@ function create(this: Phaser.Scene) {
   scoreText = this.add.text(16, 16, "Score: " + score, { fontSize: "24px", color: "#000" });
   roundText = this.add.text(650, 16, "Round: " + level, { fontSize: "24px", color: "#000" });
 
+  console.dir(this.input, "inout");
+
+  if (this.input.manager.touch) {
+    this.input.on("pointerdown", function (pointer: any) {
+      var touchX = pointer.x;
+      var touchY = pointer.y;
+      console.log(3434344, touchX, touchY);
+
+      if (touchX > player.x) {
+        player.setVelocityX(160);
+        player.anims.play("left", true);
+      } else {
+        player.setVelocityX(-160);
+        player.anims.play("right", true);
+      }
+    });
+
+    this.input.on("pointerup", function (pointer: any) {
+      player.setVelocityX(0);
+      var touchX = pointer.x;
+      var touchY = pointer.y;
+      console.log(23424, touchX, touchY);
+    });
+  }
+
   // 炸弹组
   bombs = this.physics.add.group();
   // 星星组
   stars = this.physics.add.group({
     key: "star",
-    repeat: 11,
+    repeat: startsNum - 1,
     setXY: { x: 12, y: 0, stepX: 70 },
   });
   stars.children.iterate(function (child) {
-    (child as Phaser.Physics.Arcade.Sprite).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    (child as Sprite).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
   });
 
   player = this.physics.add.sprite(100, 450, "dude");
@@ -118,7 +139,6 @@ function create(this: Phaser.Scene) {
   this.physics.add.collider(stars, platforms);
   this.physics.add.collider(bombs, platforms);
   this.physics.add.collider(player, bombs, (_, bomb) => {
-    console.log(this.game.config.width);
     player.setTint(0xff0000);
     console.log("died");
     gameOver.play({ volume: 0.6 });
@@ -142,11 +162,7 @@ function create(this: Phaser.Scene) {
     // 收集完了, 开始下一局
     if (stars.countActive(true) <= 0) {
       // alert("成功收集完所有星星, 点击开始下一局");
-      const bomb = bombs.create(
-        Phaser.Math.Between(50, 600),
-        16,
-        "bomb"
-      ) as Phaser.Physics.Arcade.Sprite;
+      const bomb = bombs.create(Phaser.Math.Between(50, 600), 16, "bomb") as Sprite;
 
       bomb.setBounce(1);
       bomb.setCollideWorldBounds(true);
@@ -164,6 +180,15 @@ function create(this: Phaser.Scene) {
 }
 
 function update(this: Phaser.Scene) {
+  // var pointer = this.input.activePointer;
+  // if (pointer.isDown) {
+  //   var touchX = pointer.x;
+  //   var touchY = pointer.y;
+  //   console.log(234425555, touchX);
+
+  //   // ...
+  // }
+
   if (cursors.left.isDown) {
     player.setVelocityX(-160);
     player.anims.play("left", true);

@@ -13,11 +13,11 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
-    "typeRoots": ["./node_modules/phaser/types", "./types/"],
+    "typeRoots": ["./node_modules/@types", "./node_modules/phaser/types", "src/types"],
     "paths": {
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*", "./types/**/*"],
+  "include": ["src/**/*", "src/types/**/*"],
   "exclude": ["node_modules", "public", "dist", "test", "docs", "tests"]
 }
