@@ -40,14 +40,19 @@ let liveNum = 1;
 let score = 0;
 let scoreText: Phaser.GameObjects.Text;
 let roundText: Phaser.GameObjects.Text;
+let speedText: Phaser.GameObjects.Text;
 // 游戏结束
 let isGameOver = false;
 // 星星数量
 let startsNum = 12;
 // 是否正在触摸屏幕
 let isTaping = false;
+// 基础速度
+let baseSpeed = 160;
 // 长按加速跑
 let speedFactor = 0;
+// 收集星星后给的速度增益
+let collectStarAddSpeed = 0;
 let camera: Phaser.Cameras.Scene2D.Camera;
 const clientWidth = document.documentElement.clientWidth;
 const clientHeight = document.documentElement.clientHeight;
@@ -87,6 +92,10 @@ function create(this: Phaser.Scene) {
 
   scoreText = this.add.text(16, 16, "Score: " + score, { fontSize: "24px", color: "#fff" });
   roundText = this.add.text(650, 16, "Round: " + level, { fontSize: "24px", color: "#fff" });
+  speedText = this.add.text(650, 45, "Speed: " + calcSpeed(baseSpeed), {
+    fontSize: "16px",
+    color: "#fff",
+  });
 
   document.body.addEventListener("click", () => {
     if (isGameOver) {
@@ -115,11 +124,13 @@ function create(this: Phaser.Scene) {
       isTaping = true;
 
       if (touchX > player.x) {
-        player.setVelocityX(160 + speedFactor);
+        player.setVelocityX(calcSpeed(baseSpeed));
         player.anims.play("right", true);
+        speedText.setText("Speed: " + calcSpeed(baseSpeed).toFixed(2));
       } else {
-        player.setVelocityX(-(160 + speedFactor));
+        player.setVelocityX(-calcSpeed(baseSpeed));
         player.anims.play("left", true);
+        speedText.setText("Speed: " + calcSpeed(baseSpeed).toFixed(2));
       }
     });
 
@@ -130,8 +141,8 @@ function create(this: Phaser.Scene) {
       // 终点的滑动距离超过精灵的高度, 上跳
       if (startTouchY - endTouchY > player.height) {
         if (player.body.touching.down) {
-          // 身体在地面时才能跳跃
-          player.setVelocityY(-330);
+          // 身体在地面时才能跳跃, 触摸不好操作,跳高一点
+          player.setVelocityY(-370);
         }
       } else if (Math.abs(endTouchY - startTouchY) > player.height) {
         //  下降
@@ -262,6 +273,17 @@ function create(this: Phaser.Scene) {
     collect.play();
     score += 10;
     scoreText.setText("Score: " + score);
+    collectStarAddSpeed += 50;
+    console.log("加速!");
+
+    this.time.addEvent({
+      delay: 8000,
+      callback: () => {
+        collectStarAddSpeed -= 50;
+        console.log("加速失效");
+      },
+      loop: false,
+    });
 
     // 收集完了, 开始下一局
     if (stars.countActive(true) <= 0) {
@@ -273,7 +295,7 @@ function create(this: Phaser.Scene) {
       bomb.setVelocity(Phaser.Math.FloatBetween(-200, 200), 20);
 
       liveGroup
-        .create(30 * (liveNum - 1), 60, "dude", 4)
+        .create(30 * liveNum, 60, "dude", 4)
         .setTint(0xffcc00)
         .setScale(0.8);
 
@@ -289,15 +311,21 @@ function create(this: Phaser.Scene) {
   cursors = this.input.keyboard.createCursorKeys();
 }
 
+function calcSpeed(baseSpeed: number): number {
+  return baseSpeed + collectStarAddSpeed + speedFactor;
+}
+
 function update(this: Phaser.Scene) {
-  speedFactor += 2;
+  speedFactor += 0.2;
   if (cursors.left.isDown) {
-    player.setVelocityX(-(160 + speedFactor));
+    player.setVelocityX(-calcSpeed(baseSpeed));
+    speedText.setText("Speed: " + calcSpeed(baseSpeed).toFixed(2));
 
     player.anims.play("left", true);
   } else if (cursors.right.isDown) {
-    player.setVelocityX(160 + speedFactor);
     player.anims.play("right", true);
+    player.setVelocityX(calcSpeed(baseSpeed));
+    speedText.setText("Speed: " + calcSpeed(baseSpeed).toFixed(2));
   } else if (cursors.up.isDown) {
     // 禁止多段跳
     if (!player.body.touching.down) {
@@ -307,13 +335,14 @@ function update(this: Phaser.Scene) {
     player.setVelocityY(-300);
   } else if (cursors.down.isDown) {
     player.anims.play("turn", true);
-    player.setVelocityY(350);
+    player.setVelocityY(calcSpeed(350) - collectStarAddSpeed);
   } else {
     // 正在触摸, 不触发事件
     if (!isTaping) {
       player.anims.play("turn", true);
       player.setVelocityX(0);
       speedFactor = 0;
+      speedText.setText("Speed: " + calcSpeed(baseSpeed));
     }
   }
 

@@ -1,8 +1,9 @@
 {
   "name": "collect-stars",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Phaser3, collect-stars 星星收集",
   "main": "index.js",
+  "homepage": "https://github.com/xstnet/collect-stars",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack server --config webpack.config.js",
