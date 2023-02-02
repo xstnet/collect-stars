@@ -12,6 +12,12 @@ module.exports = {
     clean: true,
   },
 
+  devtool: false,
+  performance: {
+    maxEntrypointSize: 2 * 1024 * 1024,
+    maxAssetSize: 2 * 1024 * 1024,
+  },
+
   optimization: {
     minimizer: [
       new TerserPlugin({
