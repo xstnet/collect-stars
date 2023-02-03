@@ -1,5 +1,6 @@
 import { relative } from "path";
 import Phaser from "phaser";
+import { createLoadingAnimation, removeLoading } from "./utils/createLoadingAnimation";
 import { getRelativePositionToCamera } from "./utils/util";
 // import First from "./Scene/01";
 // import Second from "./Scene/02";
@@ -8,6 +9,10 @@ var config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: 800,
   height: 600,
+  dom: {
+    // 在canvas之上添加一个dom, 大小完全=canvas
+    createContainer: true,
+  },
   physics: {
     default: "arcade",
     arcade: {
@@ -68,11 +73,24 @@ function preload(this: Phaser.Scene) {
   this.load.audio("collect", "assets/sounds/collect.mp3");
   this.load.audio("bgm", "assets/sounds/bg.mp3");
   this.load.audio("gameOver", "assets/sounds/game_over.mp3");
+
+  createLoadingAnimation(this, 400, 300);
+
+  const dom = document.querySelector("#phaserGame div")!;
+  this.load.on("start", () => {
+    document.querySelector("h1")?.remove();
+  });
+  this.load.on("progress", (progress: number) => {
+    dom.innerHTML = "加载中..." + progress * 100 + "%";
+  });
+  this.load.on("complete", () => {
+    dom.innerHTML = "";
+    removeLoading();
+  });
 }
 
 function create(this: Phaser.Scene) {
   camera = this.cameras.main;
-
   // 背景图
   const bg = this.add.image(0, 0, "sky").setOrigin(0, 0);
   console.log("bbbb", bg.displayWidth, bg.width);
@@ -81,9 +99,11 @@ function create(this: Phaser.Scene) {
   const platforms = this.physics.add.staticGroup();
   platforms.create(400, 584, "ground").setScale(2, 1).refreshBody();
   platforms.create(80, 220, "ground").setScale(0.4, 1).refreshBody();
-  platforms.create(800, 300, "ground");
+  platforms.create(600, 300, "ground").setDisplaySize(250, 32).refreshBody();
   platforms.create(400, 440, "ground").setScale(0.7, 1).refreshBody();
   platforms.create(400, 160, "ground").setScale(0.37, 1).refreshBody();
+  // 使用display width,height, 同样也需要refresh
+  // platforms.create(300, 30, "ground").setDisplaySize(1000, 32);
 
   collect = this.sound.add("collect");
   gameOver = this.sound.add("gameOver");
@@ -142,11 +162,11 @@ function create(this: Phaser.Scene) {
       if (startTouchY - endTouchY > player.height) {
         if (player.body.touching.down) {
           // 身体在地面时才能跳跃, 触摸不好操作,跳高一点
-          player.setVelocityY(-370);
+          player.setVelocityY(-(calcSpeed(370) - collectStarAddSpeed));
         }
       } else if (Math.abs(endTouchY - startTouchY) > player.height) {
         //  下降
-        player.setVelocityY(350);
+        player.setVelocityY(calcSpeed(350));
       }
       isTaping = false;
     });
@@ -162,12 +182,32 @@ function create(this: Phaser.Scene) {
     repeat: startsNum - 1,
     setXY: { x: 12, y: 0, stepX: 70 },
   });
-  stars.children.iterate(function (child) {
+
+  stars.children.iterate((child) => {
     (child as Sprite).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    //  增加旋转动画, 为每一个星星单独增加速度, 开始时间
+    this.time.addEvent({
+      delay: Phaser.Math.Between(300, 1000),
+      callback: () => {
+        const starWidthGradient = [
+          24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24,
+        ];
+        this.time.addEvent({
+          delay: Phaser.Math.Between(60, 120),
+          loop: true,
+          callback: () => {
+            const displayWidth = starWidthGradient.shift() as number;
+            (child as Sprite).displayWidth = displayWidth;
+            starWidthGradient.push(displayWidth);
+          },
+        });
+      },
+    });
   });
 
   player = this.physics.add.sprite(100, 450, "dude");
-
+  // 游戏自动缩放了(修改了 <meta> scalable), 这个也用不到了
+  /* 
   // camera.setFollowOffset(100, 100);
   // camera.setBounds(0, 0, Number(this.game.config.width), Number(this.game.config.height));
 
@@ -181,6 +221,7 @@ function create(this: Phaser.Scene) {
   // camera.setLerp(1, 0);
 
   // camera.setDeadzone(800, 600);
+  
   camera.on("followupdate", (_: any, player: Sprite) => {
     // 竖向不需要
     followSpeedY = 0;
@@ -209,14 +250,19 @@ function create(this: Phaser.Scene) {
         camera.setLerp(followSpeedX, followSpeedY);
       }
     }
-  });
+  }); */
 
   // 创建人物时有一个弹跳动画,之后取消
   player.setBounce(0.2);
-  setTimeout(() => {
-    player.setBounce(0);
-    camera.setLerp(0.5, 0);
-  }, 1000);
+  this.time.addEvent({
+    delay: 1000,
+    callback: () => {
+      player.setBounce(0);
+      // camera.setLerp(0.5, 0);
+    },
+  });
+
+  //  与时间边缘碰撞
   player.setCollideWorldBounds(true);
   this.anims.create({
     key: "left",
@@ -257,9 +303,9 @@ function create(this: Phaser.Scene) {
       });
       this.physics.pause();
     } else {
-      player.setTint(0xff0000);
       // @ts-ignore
       bomb.setPosition(50, 50);
+      gameOver.play({ volume: 0.6 });
       player.clearTint();
       player.setPosition(100, 450);
       // 用起来方便
@@ -267,7 +313,7 @@ function create(this: Phaser.Scene) {
     }
   });
   // 收集星星
-  this.physics.add.collider(player, stars, (_, star) => {
+  this.physics.add.overlap(player, stars, (_, star) => {
     // @ts-ignore
     star.disableBody(true, true);
     collect.play();
@@ -332,10 +378,10 @@ function update(this: Phaser.Scene) {
       return;
     }
     player.anims.play("turn", true);
-    player.setVelocityY(-300);
+    player.setVelocityY(-(calcSpeed(350) - collectStarAddSpeed));
   } else if (cursors.down.isDown) {
     player.anims.play("turn", true);
-    player.setVelocityY(calcSpeed(350) - collectStarAddSpeed);
+    player.setVelocityY(calcSpeed(350));
   } else {
     // 正在触摸, 不触发事件
     if (!isTaping) {
