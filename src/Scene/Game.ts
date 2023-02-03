@@ -1,8 +1,7 @@
-class Second extends Phaser.Scene {
-  constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
-    super(config);
-  }
+import BaseScene from "./BaseScene";
 
+class GameScene extends BaseScene {
+  sceneName = "游戏场景";
   init() {
     console.log("init2");
   }
@@ -14,8 +13,8 @@ class Second extends Phaser.Scene {
   }
 
   update(time: number, delta: number): void {
-    console.log("update2");
+    console.log("update2222");
   }
 }
 
-export default Second;
+export default GameScene;

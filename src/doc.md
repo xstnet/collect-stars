@@ -28,3 +28,17 @@ if (keyB.isDown) {
   // xxxx
 }
 ```
+
+网上找的按键绑定
+
+```js
+const leftArrow = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+leftArrow.on("up", () => {
+  this.cards.forEach((card) => {
+    card.x -= 20;
+  });
+
+  const card = this.deal();
+  this.cards.push(card);
+});
+```

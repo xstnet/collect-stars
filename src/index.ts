@@ -2,34 +2,17 @@ import { relative } from "path";
 import Phaser from "phaser";
 import { createLoadingAnimation, removeLoading } from "./utils/createLoadingAnimation";
 import { getRelativePositionToCamera } from "./utils/util";
-// import First from "./Scene/01";
-// import Second from "./Scene/02";
+import BootLoaderScene from "./Scene/BootLoader";
+import GameScene from "./Scene/Game";
+import { defaultGameConfig } from "./config/game";
 
-var config: Phaser.Types.Core.GameConfig = {
-  type: Phaser.AUTO,
-  width: 800,
-  height: 600,
-  dom: {
-    // 在canvas之上添加一个dom, 大小完全=canvas
-    createContainer: true,
-  },
-  physics: {
-    default: "arcade",
-    arcade: {
-      gravity: { y: 300 },
-      debug: process.env.NODE_ENV === "development",
-    },
-  },
-  parent: "phaserGame",
-  scene: {
-    preload: preload,
-    create: create,
-    update: update,
-  },
-  // scene: First,
-};
+const gameConfig = { ...defaultGameConfig };
 
-const game = new Phaser.Game(config);
+const game = new Phaser.Game(gameConfig);
+
+game.scene.add("boot", BootLoaderScene);
+game.scene.add("game", GameScene);
+game.scene.start("boot");
 
 let cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 let player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -83,7 +66,7 @@ function preload(this: Phaser.Scene) {
   this.load.on("progress", (progress: number) => {
     dom.innerHTML = "加载中..." + progress * 100 + "%";
   });
-  this.load.on("complete", () => {
+  this.load.on(Phaser.Loader.Events.COMPLETE, () => {
     dom.innerHTML = "";
     removeLoading();
   });
