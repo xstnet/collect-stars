@@ -1,8 +1,13 @@
 // 所有场景的父类
-class BaseScene extends Phaser.Scene {
+
+export type IState = Record<string, any>;
+
+interface IScene<T> {
+  destory: () => void;
+}
+class BaseScene<S extends IState = IState> extends Phaser.Scene implements IScene<S> {
   // 场景名, 给程序员看的
   sceneName = "";
-  state: Record<string, any> = {};
 
   constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
     super(config);

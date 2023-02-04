@@ -21,6 +21,8 @@ module.exports = {
   optimization: {
     minimizer: [
       new TerserPlugin({
+        // 去除 License文件
+        extractComments: false,
         terserOptions: {
           output: {
             comments: false,
@@ -49,5 +51,10 @@ module.exports = {
     new CopyPlugin({ patterns: [{ from: "src/assets", to: "assets" }] }),
   ],
   // 使用无扩展名引入时,先匹配ts, 在匹配js
-  resolve: { extensions: [".ts", ".js"] },
+  resolve: {
+    extensions: [".ts", ".js"],
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
+  },
 };
