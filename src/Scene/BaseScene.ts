@@ -2,10 +2,13 @@
 
 export type IState = Record<string, any>;
 
-interface IScene<T> {
+export type IBaseSoundState = Record<string, Game.Sound>;
+export type IBaseTextState = Record<string, Game.Text>;
+
+interface IScene {
   destory: () => void;
 }
-class BaseScene<S extends IState = IState> extends Phaser.Scene implements IScene<S> {
+class BaseScene extends Phaser.Scene implements IScene {
   // 场景名, 给程序员看的
   sceneName = "";
 

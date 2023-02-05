@@ -13,10 +13,7 @@ Demo: https://xstnet.github.io/collect-stars
 
 ### 更新日志
 
-#### 2022.02.03
-
-- 增加星星旋转动画
-- 实现了一个劣质的加载页面
+https://github.com/xstnet/collect-stars/changelog.md
 
 ### Install
 

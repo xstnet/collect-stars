@@ -5,8 +5,12 @@ declare global {
     abc: any; //加入对象
   }
 
-  type Sprite = Phaser.Physics.Arcade.Sprite;
-  type Image = Phaser.Physics.Arcade.Image;
+  namespace Game {
+    type Sprite = Phaser.Physics.Arcade.Sprite;
+    type Image = Phaser.Physics.Arcade.Image;
+    type Sound = Phaser.Sound.BaseSound;
+    type Text = Phaser.GameObjects.Text;
+  }
 }
 
 // 必须要导出,不然无效
