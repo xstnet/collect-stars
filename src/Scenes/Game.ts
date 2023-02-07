@@ -1,4 +1,4 @@
-import BaseScene, { IBaseSoundState, IBaseTextState } from "./BaseScene";
+import BaseScene, { IBaseSoundState, IBaseTextState } from './BaseScene';
 
 type ISoundState = IBaseSoundState & {
   bgm?: Game.Sound;
@@ -44,8 +44,8 @@ type RequiredState = {
   soundState: Required<ISoundState>;
 };
 class GameScene extends BaseScene {
-  sceneName = "游戏场景";
-  sceneKey = "Game";
+  sceneName = '游戏场景';
+  sceneKey = 'Game';
   soundState: ISoundState = {};
   textState: ITextState = {};
   state: IState = {
@@ -58,45 +58,45 @@ class GameScene extends BaseScene {
     level: 1,
     speedFactor: 0,
     collectStarAddSpeed: 50,
-    liveGroup: undefined,
+    liveGroup: undefined
   };
 
   create() {
     this.state.camera = this.cameras.main;
     // 背景图
-    this.add.image(0, 0, "sky").setOrigin(0, 0);
+    this.add.image(0, 0, 'sky').setOrigin(0, 0);
 
     // Add Sounds
-    this.soundState.collect = this.sound.add("collect");
-    this.soundState.gameOver = this.sound.add("gameOver");
-    this.soundState.bgm = this.sound.add("bgm");
+    this.soundState.collect = this.sound.add('collect');
+    this.soundState.gameOver = this.sound.add('gameOver');
+    this.soundState.bgm = this.sound.add('bgm');
     const { soundState, textState } = this;
 
     // 生成跳跃平台
     const platforms = this.physics.add.staticGroup();
-    platforms.create(400, 584, "ground").setScale(2, 1).refreshBody();
-    platforms.create(80, 220, "ground").setScale(0.4, 1).refreshBody();
-    platforms.create(600, 300, "ground").setDisplaySize(250, 32).refreshBody();
-    platforms.create(400, 440, "ground").setScale(0.7, 1).refreshBody();
-    platforms.create(400, 160, "ground").setScale(0.37, 1).refreshBody();
+    platforms.create(400, 584, 'ground').setScale(2, 1).refreshBody();
+    platforms.create(80, 220, 'ground').setScale(0.4, 1).refreshBody();
+    platforms.create(600, 300, 'ground').setDisplaySize(250, 32).refreshBody();
+    platforms.create(400, 440, 'ground').setScale(0.7, 1).refreshBody();
+    platforms.create(400, 160, 'ground').setScale(0.37, 1).refreshBody();
     // 使用display width,height, 同样也需要refresh
     // platforms.create(300, 30, "ground").setDisplaySize(1000, 32);
 
     soundState.bgm!.play({ volume: 0.5, loop: true });
 
-    this.state.player = this.physics.add.sprite(100, 450, "dude");
+    this.state.player = this.physics.add.sprite(100, 450, 'dude');
 
-    textState.scoreText = this.add.text(16, 16, "Score: " + this.state.score, {
-      fontSize: "24px",
-      color: "#fff",
+    textState.scoreText = this.add.text(16, 16, 'Score: ' + this.state.score, {
+      fontSize: '24px',
+      color: '#fff'
     });
-    textState.roundText = this.add.text(650, 16, "Round: " + this.state.level, {
-      fontSize: "24px",
-      color: "#fff",
+    textState.roundText = this.add.text(650, 16, 'Round: ' + this.state.level, {
+      fontSize: '24px',
+      color: '#fff'
     });
-    textState.speedText = this.add.text(650, 45, "Speed: " + this.calcSpeed(this.state.baseSpeed), {
-      fontSize: "16px",
-      color: "#fff",
+    textState.speedText = this.add.text(650, 45, 'Speed: ' + this.calcSpeed(this.state.baseSpeed), {
+      fontSize: '16px',
+      color: '#fff'
     });
 
     this.handleTouch();
@@ -108,9 +108,9 @@ class GameScene extends BaseScene {
     this.state.bombs = this.physics.add.group();
     // 星星组
     this.state.stars = this.physics.add.group({
-      key: "star",
+      key: 'star',
       repeat: this.state.startsNum - 1,
-      setXY: { x: 12, y: 0, stepX: 70 },
+      setXY: { x: 12, y: 0, stepX: 70 }
     });
 
     this.state.stars.children.iterate((child: any) => {
@@ -121,7 +121,7 @@ class GameScene extends BaseScene {
         callback: () => {
           const starWidthGradient = [
             24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22,
-            24,
+            24
           ];
           this.time.addEvent({
             delay: Phaser.Math.Between(60, 120),
@@ -130,9 +130,9 @@ class GameScene extends BaseScene {
               const displayWidth = starWidthGradient.shift() as number;
               (child as Game.Sprite).displayWidth = displayWidth;
               starWidthGradient.push(displayWidth);
-            },
+            }
           });
-        },
+        }
       });
     });
 
@@ -142,29 +142,29 @@ class GameScene extends BaseScene {
       delay: 1000,
       callback: () => {
         this.state.player?.setBounce(0);
-      },
+      }
     });
 
     //  与世界边缘碰撞
     this.state.player.setCollideWorldBounds(true);
     this.anims.create({
-      key: "left",
+      key: 'left',
       frameRate: 10,
-      frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
-      repeat: -1,
+      frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
+      repeat: -1
     });
 
     this.anims.create({
-      key: "turn",
-      frames: [{ key: "dude", frame: 4 }],
-      frameRate: 20,
+      key: 'turn',
+      frames: [{ key: 'dude', frame: 4 }],
+      frameRate: 20
     });
 
     this.anims.create({
-      key: "right",
+      key: 'right',
       frameRate: 10,
-      frames: this.anims.generateFrameNumbers("dude", { start: 5 }),
-      repeat: -1,
+      frames: this.anims.generateFrameNumbers('dude', { start: 5 }),
+      repeat: -1
     });
 
     this.physics.add.collider(this.state.player, platforms);
@@ -198,59 +198,58 @@ class GameScene extends BaseScene {
 
     // UP 禁止多段跳
     if (state.cursors.up.isDown && state.player.body.touching.down) {
-      state.player.anims.play("turn", true);
+      state.player.anims.play('turn', true);
       state.player.setVelocityY(-(this.calcSpeed(350) - state.collectStarAddSpeed));
     }
     // Left
     else if (state.cursors.left.isDown) {
       this.state.player!.setVelocityX(-this.calcSpeed(state.baseSpeed));
-      textState.speedText.setText("Speed: " + this.calcSpeed(state.baseSpeed).toFixed(2));
-      state.player.anims.play("left", true);
+      textState.speedText.setText('Speed: ' + this.calcSpeed(state.baseSpeed).toFixed(2));
+      state.player.anims.play('left', true);
       // Right
     } else if (state.cursors!.right.isDown) {
-      state.player.anims.play("right", true);
+      state.player.anims.play('right', true);
       state.player.setVelocityX(this.calcSpeed(state.baseSpeed));
-      textState.speedText.setText("Speed: " + this.calcSpeed(state.baseSpeed).toFixed(2));
+      textState.speedText.setText('Speed: ' + this.calcSpeed(state.baseSpeed).toFixed(2));
       // DOWN
     } else if (state.cursors!.down.isDown) {
-      state.player.anims.play("turn", true);
+      state.player.anims.play('turn', true);
       state.player.setVelocityY(this.calcSpeed(350));
     } else {
       // 正在触摸, 不触发事件
       if (!state.isTaping) {
-        state.player!.anims.play("turn", true);
+        state.player!.anims.play('turn', true);
         state.player!.setVelocityX(0);
         state.speedFactor = 0;
-        textState.speedText.setText("Speed: " + this.calcSpeed(state.baseSpeed));
+        textState.speedText.setText('Speed: ' + this.calcSpeed(state.baseSpeed));
       }
     }
   }
 
   handleCollectStar(player: Game.Sprite, star: Game.Sprite) {
     const { soundState, textState, state } = this as any as RequiredState;
-    console.log("soundState", soundState, this);
 
     star.disableBody(true, true);
     soundState.collect.play();
     state.score += 10;
-    textState.scoreText?.setText("Score: " + state.score);
+    textState.scoreText?.setText('Score: ' + state.score);
     state.collectStarAddSpeed += 50;
-    console.log("加速!");
+    console.log('加速!');
 
     // 加速结束
     this.time.addEvent({
       delay: 8000,
       callback: () => {
         state.collectStarAddSpeed -= 50;
-        console.log("加速失效");
+        console.log('加速失效');
       },
-      loop: false,
+      loop: false
     });
 
     // 收集完了, 开始下一局
     if (state.stars.countActive(true) <= 0) {
       // alert("成功收集完所有星星, 点击开始下一局");
-      const bomb = state.bombs.create(Phaser.Math.Between(50, 600), 16, "bomb") as Game.Sprite;
+      const bomb = state.bombs.create(Phaser.Math.Between(50, 600), 16, 'bomb') as Game.Sprite;
 
       bomb.setBounce(1);
       bomb.setCollideWorldBounds(true);
@@ -258,13 +257,13 @@ class GameScene extends BaseScene {
 
       // 增加一个 live
       state.liveGroup
-        .create(30 * state.liveNum, 60, "dude", 4)
+        .create(30 * state.liveNum, 60, 'dude', 4)
         .setTint(0xffcc00)
         .setScale(0.8);
 
       state.level++;
       state.liveNum++;
-      textState.roundText.setText("Round: " + state.level);
+      textState.roundText.setText('Round: ' + state.level);
       state.stars.children.iterate((star) => {
         // @ts-ignore
         star.enableBody(true, star.x, 0, true, true);
@@ -277,13 +276,13 @@ class GameScene extends BaseScene {
     this.state.liveNum--;
     if (this.state.liveNum <= 0) {
       this.state.player!.setTint(0xff0000);
-      console.log("died");
+      console.log('died');
       soundState.gameOver!.play({ volume: 0.6 });
       this.state.isGameOver = true;
       soundState.bgm?.pause();
-      this.add.text(800 / 2 - 100, 600 / 2 - 20, "游戏结束, 点击屏幕重新开始", {
-        fontSize: "18px",
-        color: "#000",
+      this.add.text(800 / 2 - 100, 600 / 2 - 20, '游戏结束, 点击屏幕重新开始', {
+        fontSize: '18px',
+        color: '#000'
       });
       this.physics.pause();
     } else {
@@ -304,7 +303,7 @@ class GameScene extends BaseScene {
 
   // 重置变量
   resetVars() {
-    console.log("重新开始");
+    console.log('重新开始');
     this.state.score = 0;
     this.state.level = 1;
     this.state.liveNum = 1;
@@ -312,13 +311,13 @@ class GameScene extends BaseScene {
   }
 
   handleTouch() {
-    const { speedText } = this.textState as RequiredState["textState"];
+    const { speedText } = this.textState as RequiredState['textState'];
     // 触摸事件
     if (this.input.manager.touch) {
       let startTouchY = 0,
         endTouchY = 0;
 
-      this.input.on("pointerdown", (pointer: any) => {
+      this.input.on('pointerdown', (pointer: any) => {
         // 重新开始
         if (this.state.isGameOver) {
           this.resetVars();
@@ -335,16 +334,16 @@ class GameScene extends BaseScene {
 
         if (touchX > this.state.player!.x) {
           this.state.player!.setVelocityX(this.calcSpeed(this.state.baseSpeed));
-          this.state.player!.anims.play("right", true);
-          speedText.setText("Speed: " + this.calcSpeed(this.state.baseSpeed).toFixed(2));
+          this.state.player!.anims.play('right', true);
+          speedText.setText('Speed: ' + this.calcSpeed(this.state.baseSpeed).toFixed(2));
         } else {
           this.state.player!.setVelocityX(-this.calcSpeed(this.state.baseSpeed));
-          this.state.player!.anims.play("left", true);
-          speedText.setText("Speed: " + this.calcSpeed(this.state.baseSpeed).toFixed(2));
+          this.state.player!.anims.play('left', true);
+          speedText.setText('Speed: ' + this.calcSpeed(this.state.baseSpeed).toFixed(2));
         }
       });
 
-      this.input.on("pointerup", (pointer: any) => {
+      this.input.on('pointerup', (pointer: any) => {
         this.state.player?.setVelocityX(0);
         const worldPointer = this.state.camera!.getWorldPoint(pointer.x, pointer.y);
         endTouchY = worldPointer.y;
@@ -364,7 +363,7 @@ class GameScene extends BaseScene {
   }
 
   handleRestart() {
-    document.body.addEventListener("click", () => {
+    document.body.addEventListener('click', () => {
       if (this.state.isGameOver) {
         this.resetVars();
         this.scene.restart();
